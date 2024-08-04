@@ -17,7 +17,7 @@ const StartQuiz = ({ navigate }) => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await axios.get('quiz-backend-lemon.vercel.app/api/quizzes');
+        const response = await axios.get('https://quiz-n8v9.onrender.com/api/quizzes');
         setQuizzes(response.data);
       } catch (err) {
         console.error('Error fetching quizzes', err);
@@ -77,7 +77,7 @@ const StartQuiz = ({ navigate }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`quiz-backend-lemon.vercel.app/api/quizzes/${quizId}`);
+      const response = await axios.get(`https://quiz-n8v9.onrender.com/api/quizzes/${quizId}`);
       setQuiz(response.data);
     } catch (err) {
       setError('Quiz not found');
