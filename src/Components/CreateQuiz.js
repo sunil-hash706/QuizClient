@@ -6,7 +6,7 @@ const CreateQuiz = ({ navigate }) => {
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
-  const [options, setOptions] = useState(['']);
+  const [options, setOptions] = useState(['', '', '', '']); // Initialize with 4 empty options
   const [correctOptions, setCorrectOptions] = useState(['']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,7 +20,7 @@ const CreateQuiz = ({ navigate }) => {
     };
     setQuestions([...questions, newQuestion]);
     setCurrentQuestion('');
-    setOptions(['']);
+    setOptions(['', '', '', '']); // Reset to 4 empty options
     setCorrectOptions(['']);
   };
 
@@ -125,9 +125,3 @@ const CreateQuiz = ({ navigate }) => {
 };
 
 export default CreateQuiz;
-
-
-
-
-// sunilkug20cse -- username
-// okDVikoMRaItbKej -- pass
