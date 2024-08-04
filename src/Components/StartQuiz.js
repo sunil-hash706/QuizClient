@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Make sure to install axios
-import './StartQuiz.css'; // Import the CSS file
+import axios from 'axios';
+import './StartQuiz.css';
 
 const StartQuiz = ({ navigate }) => {
   const [quizId, setQuizId] = useState('');
@@ -13,6 +13,9 @@ const StartQuiz = ({ navigate }) => {
   const [error, setError] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+  const [timer, setTimer] = useState(3); // Timer starts at 3 seconds
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -26,39 +29,37 @@ const StartQuiz = ({ navigate }) => {
     fetchQuizzes();
   }, []);
 
-  const handleOptionClick = (option) => {
-    if (selectedOptions.includes(option)) {
-      setSelectedOptions(selectedOptions.filter((opt) => opt !== option));
-    } else {
-      setSelectedOptions([...selectedOptions, option]);
+  useEffect(() => {
+    let interval;
+    if (showFeedback && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(timer => timer - 1);
+      }, 1000);
+    } else if (showFeedback && timer === 0) {
+      setShowFeedback(false);
+      setTimer(3); // Reset timer for the next question
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to next question
     }
+    return () => clearInterval(interval);
+  }, [showFeedback, timer]);
+
+  const shuffleArray = (array) => {
+    return array.sort(() => Math.random() - 0.5);
   };
 
-  const handleNext = () => {
-    setCurrentQuestionIndex(currentQuestionIndex + 1);
-    setSelectedOptions([]);
-    setShowFeedback(false);
-  };
-
-  const handlePrevious = () => {
-    setCurrentQuestionIndex(currentQuestionIndex - 1);
-    setSelectedOptions([]);
-    setShowFeedback(false);
-  };
-
-  const handleCheckAnswer = () => {
+  const handleOptionClick = (option) => {
     const currentQuestion = quiz.questions[currentQuestionIndex];
-    const correctOptions = currentQuestion.correctAnswer.split(', ').map(opt => opt.trim());
+    const correctOption = currentQuestion.correctAnswer.trim();
     const newAnsweredQuestions = { ...answeredQuestions };
 
     const optionStatus = {};
-    currentQuestion.options.forEach(option => {
-      if (correctOptions.includes(option)) {
-        optionStatus[option] = 'correct';
-      } else if (selectedOptions.includes(option)) {
-        optionStatus[option] = 'incorrect';
+    currentQuestion.options.forEach(opt => {
+      if (opt === correctOption) {
+        optionStatus[opt] = 'correct';
+      } else if (opt === option) {
+        optionStatus[opt] = 'incorrect';
       } else {
-        optionStatus[option] = 'default';
+        optionStatus[opt] = 'default';
       }
     });
 
@@ -66,10 +67,12 @@ const StartQuiz = ({ navigate }) => {
     setAnsweredQuestions(newAnsweredQuestions);
     setShowFeedback(true);
 
-    if (correctOptions.every(opt => selectedOptions.includes(opt)) && selectedOptions.length === correctOptions.length) {
+    if (option === correctOption) {
       setFeedbackMessage('Correct Answer');
+      setCorrectCount(correctCount + 1);
     } else {
       setFeedbackMessage('Wrong Answer');
+      setIncorrectCount(incorrectCount + 1);
     }
   };
 
@@ -78,7 +81,11 @@ const StartQuiz = ({ navigate }) => {
     setError(null);
     try {
       const response = await axios.get(`https://quiz-n8v9.onrender.com/api/quizzes/${quizId}`);
-      setQuiz(response.data);
+      const shuffledQuestions = shuffleArray(response.data.questions).map(question => ({
+        ...question,
+        options: shuffleArray(question.options)
+      }));
+      setQuiz({ ...response.data, questions: shuffledQuestions });
     } catch (err) {
       setError('Quiz not found');
       console.error(err);
@@ -90,6 +97,10 @@ const StartQuiz = ({ navigate }) => {
   return (
     <div>
       <h2>Start Quiz</h2>
+      <div className="scoreboard">
+        <p>Correct: {correctCount}</p>
+        <p>Incorrect: {incorrectCount}</p>
+      </div>
       {!quiz && (
         <>
           <select
@@ -110,7 +121,7 @@ const StartQuiz = ({ navigate }) => {
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
 
-      {quiz && quiz.questions.length > 0 && (
+      {quiz && quiz.questions.length > 0 && currentQuestionIndex < quiz.questions.length && (
         <div>
           <h3>{quiz.questions[currentQuestionIndex].questionText}</h3>
           <div>
@@ -124,12 +135,20 @@ const StartQuiz = ({ navigate }) => {
               </button>
             ))}
           </div>
-          <div>
-            <button onClick={handlePrevious} disabled={currentQuestionIndex === 0}>Previous Question</button>
-            <button onClick={handleNext} disabled={currentQuestionIndex === quiz.questions.length - 1}>Next Question</button>
-            <button onClick={handleCheckAnswer}>Check Answer</button>
-          </div>
-          {showFeedback && <p className={feedbackMessage === 'Correct Answer' ? 'feedback-correct' : 'feedback-wrong'}>{feedbackMessage}</p>}
+          {showFeedback && (
+            <div className="feedback-container">
+              <p className={feedbackMessage === 'Correct Answer' ? 'feedback-correct' : 'feedback-wrong'}>{feedbackMessage}</p>
+              <p>Next question in {timer} seconds...</p>
+            </div>
+          )}
+        </div>
+      )}
+      {quiz && currentQuestionIndex >= quiz.questions.length && (
+        <div>
+          <h3>Quiz Completed!</h3>
+          <p>Your final score is:</p>
+          <p>Correct: {correctCount}</p>
+          <p>Incorrect: {incorrectCount}</p>
         </div>
       )}
       <button onClick={() => navigate('home')}>Home</button>
