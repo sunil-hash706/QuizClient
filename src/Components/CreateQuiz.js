@@ -57,7 +57,7 @@ const CreateQuiz = ({ navigate }) => {
     setError('');
     try {
       const formattedTitle = title.toUpperCase(); // Convert title to uppercase
-      await axios.post('quiz-backend-lemon.vercel.app/api/quizzes', {
+      await axios.post('https://quiz-n8v9.onrender.com/api/quizzes', {
         title: formattedTitle,
         questions,
       });
