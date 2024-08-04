@@ -15,7 +15,7 @@ const StartQuiz = ({ navigate }) => {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
-  const [timer, setTimer] = useState(3); // Timer starts at 3 seconds
+  const [timer, setTimer] = useState(6); // Timer starts at 3 seconds
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -37,7 +37,7 @@ const StartQuiz = ({ navigate }) => {
       }, 1000);
     } else if (showFeedback && timer === 0) {
       setShowFeedback(false);
-      setTimer(3); // Reset timer for the next question
+      setTimer(6); // Reset timer for the next question
       setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to next question
     }
     return () => clearInterval(interval);
