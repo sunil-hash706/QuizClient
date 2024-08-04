@@ -1,25 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import CreateQuiz from './Components/CreateQuiz';
+import StartQuiz from './Components/StartQuiz';
+import './App.css'; // Import the CSS file
 
-function App() {
+const App = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+
+  const navigate = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {currentPage === 'home' && (
+        <>
+          <h1>Quiz App</h1>
+          <button onClick={() => navigate('startQuiz')}>Start Quiz</button>
+          <button onClick={() => navigate('createQuiz')}>Create Quiz</button>
+        </>
+      )}
+      {currentPage === 'startQuiz' && <StartQuiz navigate={navigate} />}
+      {currentPage === 'createQuiz' && <CreateQuiz navigate={navigate} />}
     </div>
   );
-}
+};
 
 export default App;
