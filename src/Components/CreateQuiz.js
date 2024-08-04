@@ -7,49 +7,27 @@ const CreateQuiz = ({ navigate }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [options, setOptions] = useState(['', '', '', '']); // Initialize with 4 empty options
-  const [correctOptions, setCorrectOptions] = useState(['']);
+  const [correctOption, setCorrectOption] = useState(''); // Single correct option
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const addQuestion = () => {
-    const correctOptionValues = correctOptions.map(correctOptionIndex => options[correctOptionIndex - 1]);
+    const correctOptionValue = options[correctOption - 1];
     const newQuestion = {
       questionText: currentQuestion,
       options: options,
-      correctAnswer: correctOptionValues.join(', '),
+      correctAnswer: correctOptionValue,
     };
     setQuestions([...questions, newQuestion]);
     setCurrentQuestion('');
     setOptions(['', '', '', '']); // Reset to 4 empty options
-    setCorrectOptions(['']);
+    setCorrectOption(''); // Reset correct option
   };
 
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
-  };
-
-  const addOption = () => {
-    setOptions([...options, '']);
-  };
-
-  const removeOption = (index) => {
-    setOptions(options.filter((_, i) => i !== index));
-  };
-
-  const addCorrectOption = () => {
-    setCorrectOptions([...correctOptions, '']);
-  };
-
-  const handleCorrectOptionChange = (index, value) => {
-    const newCorrectOptions = [...correctOptions];
-    newCorrectOptions[index] = value;
-    setCorrectOptions(newCorrectOptions);
-  };
-
-  const removeCorrectOption = (index) => {
-    setCorrectOptions(correctOptions.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -94,24 +72,16 @@ const CreateQuiz = ({ navigate }) => {
               value={option}
               onChange={(e) => handleOptionChange(index, e.target.value)}
             />
-            <button className="remove" onClick={() => removeOption(index)}>Remove</button>
           </div>
         ))}
-        <button className="add" onClick={addOption}>Add Option</button>
       </div>
       <div>
-        {correctOptions.map((correctOption, index) => (
-          <div key={index} className="option-container">
-            <input
-              type="number"
-              placeholder={`Correct Option ${index + 1}`}
-              value={correctOption}
-              onChange={(e) => handleCorrectOptionChange(index, e.target.value)}
-            />
-            <button className="remove" onClick={() => removeCorrectOption(index)}>Remove</button>
-          </div>
-        ))}
-        <button className="add" onClick={addCorrectOption}>Add Correct Option</button>
+        <input
+          type="number"
+          placeholder="Correct Option (1-4)"
+          value={correctOption}
+          onChange={(e) => setCorrectOption(e.target.value)}
+        />
       </div>
       <button onClick={addQuestion}>Add Question</button>
       <button onClick={handleSubmit} disabled={loading}>
